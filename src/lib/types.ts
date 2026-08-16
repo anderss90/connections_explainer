@@ -8,7 +8,7 @@ export interface PuzzleData {
   source: PuzzleSource;
 }
 
-export type DefinitionSource = "gemini" | "dictionary";
+export type DefinitionSource = "gemini" | "dictionary" | "wikipedia";
 
 export interface WordDefinition {
   word: string;

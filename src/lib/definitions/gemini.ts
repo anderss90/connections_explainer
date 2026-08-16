@@ -34,7 +34,15 @@ export function parseGeminiResponse(
 }
 
 export function buildGeminiPrompt(words: string[]): string {
-  return `For each word in this list, provide a concise 1-2 sentence definition that a general reader would understand. Do not mention Connections, categories, or puzzle groupings.
+  return `For each word or phrase in this list, explain what it means in plain language (1-2 sentences).
+
+Guidelines:
+- If it is a company, brand, or product name, explain what that company or brand is known for.
+- If it is a famous person, say who they are and why they are known.
+- If it is a place, landmark, or organization, describe it briefly.
+- If it is slang, jargon, or part of a longer phrase, explain the common meaning.
+- If it is an ordinary English word, give a clear dictionary-style definition.
+- Do NOT mention Connections, puzzle categories, or word groupings.
 
 Return ONLY valid JSON as an array of objects with "word" and "definition" keys. Use the exact word spelling from the list.
 

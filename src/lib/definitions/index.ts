@@ -4,7 +4,24 @@ import {
   fetchDictionaryDefinitions,
 } from "./dictionary";
 import { fetchGeminiDefinitions } from "./gemini";
+import { fetchWikipediaDefinitions } from "./wikipedia";
 import type { WordDefinition } from "../types";
+
+function getMissingWords(
+  words: string[],
+  definitionsByWord: Map<string, WordDefinition>
+): string[] {
+  return words.filter((word) => !definitionsByWord.has(word));
+}
+
+function mergeDefinitions(
+  definitionsByWord: Map<string, WordDefinition>,
+  definitions: WordDefinition[]
+): void {
+  for (const definition of definitions) {
+    definitionsByWord.set(definition.word, definition);
+  }
+}
 
 export async function fetchWordDefinitions(
   words: string[],
@@ -18,38 +35,50 @@ export async function fetchWordDefinitions(
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
-  const geminiDefinitions = await fetchGeminiDefinitions(words, apiKey);
-
   const definitionsByWord = new Map<string, WordDefinition>();
-  for (const definition of geminiDefinitions) {
-    definitionsByWord.set(definition.word, definition);
-  }
 
-  const missingWords = words.filter((word) => !definitionsByWord.has(word));
+  mergeDefinitions(
+    definitionsByWord,
+    await fetchGeminiDefinitions(words, apiKey)
+  );
 
+  let missingWords = getMissingWords(words, definitionsByWord);
   if (missingWords.length > 0) {
-    const dictionaryDefinitions = await fetchDictionaryDefinitions(
-      missingWords,
-      fetchFn
+    mergeDefinitions(
+      definitionsByWord,
+      await fetchDictionaryDefinitions(missingWords, fetchFn)
     );
-
-    for (const definition of dictionaryDefinitions) {
-      definitionsByWord.set(definition.word, definition);
-    }
   }
 
-  const stillMissing = words.filter((word) => !definitionsByWord.has(word));
-  for (const word of stillMissing) {
+  missingWords = getMissingWords(words, definitionsByWord);
+  if (missingWords.length > 0) {
+    mergeDefinitions(
+      definitionsByWord,
+      await fetchWikipediaDefinitions(missingWords, fetchFn)
+    );
+  }
+
+  missingWords = getMissingWords(words, definitionsByWord);
+  if (missingWords.length > 0 && apiKey) {
+    mergeDefinitions(
+      definitionsByWord,
+      await fetchGeminiDefinitions(missingWords, apiKey)
+    );
+  }
+
+  missingWords = getMissingWords(words, definitionsByWord);
+  for (const word of missingWords) {
     const fallback = await fetchDictionaryDefinition(word, fetchFn);
     if (fallback) {
       definitionsByWord.set(word, fallback);
-    } else {
-      definitionsByWord.set(word, {
-        word,
-        definition: "Definition unavailable.",
-        source: "dictionary",
-      });
+      continue;
     }
+
+    definitionsByWord.set(word, {
+      word,
+      definition: "Definition unavailable.",
+      source: "dictionary",
+    });
   }
 
   const ordered = words

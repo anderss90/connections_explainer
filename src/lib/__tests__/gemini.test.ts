@@ -26,6 +26,8 @@ describe("gemini definitions", () => {
 
     expect(prompt).toContain("CONCERT, GIG");
     expect(prompt).toContain("JSON");
+    expect(prompt).toContain("company, brand");
+    expect(prompt).toContain("famous person");
   });
 
   it("parses Gemini JSON response", () => {
