@@ -1,4 +1,5 @@
 import type { WordDefinition } from "../types";
+import { limitDefinitions, normalizeDefinitions } from "./utils";
 
 interface DictionaryEntry {
   word: string;
@@ -10,9 +11,25 @@ interface DictionaryEntry {
 export function parseDictionaryResponse(
   entries: DictionaryEntry[],
   word: string
-): string | null {
-  const definition = entries[0]?.meanings?.[0]?.definitions?.[0]?.definition;
-  return definition?.trim() ?? null;
+): string[] {
+  const definitions: string[] = [];
+  const seen = new Set<string>();
+
+  for (const entry of entries) {
+    for (const meaning of entry.meanings ?? []) {
+      for (const item of meaning.definitions ?? []) {
+        const text = item.definition?.trim();
+        const key = text?.toLowerCase();
+
+        if (text && key && !seen.has(key)) {
+          seen.add(key);
+          definitions.push(text);
+        }
+      }
+    }
+  }
+
+  return limitDefinitions(definitions);
 }
 
 export async function fetchDictionaryDefinition(
@@ -32,15 +49,15 @@ export async function fetchDictionaryDefinition(
     }
 
     const entries = (await response.json()) as DictionaryEntry[];
-    const definition = parseDictionaryResponse(entries, word);
+    const definitions = parseDictionaryResponse(entries, word);
 
-    if (!definition) {
+    if (definitions.length === 0) {
       return null;
     }
 
     return {
       word,
-      definition,
+      definitions,
       source: "dictionary",
     };
   } catch {

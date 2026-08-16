@@ -12,7 +12,7 @@ export type DefinitionSource = "gemini" | "dictionary" | "wikipedia";
 
 export interface WordDefinition {
   word: string;
-  definition: string;
+  definitions: string[];
   source: DefinitionSource;
 }
 

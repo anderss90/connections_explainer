@@ -34,8 +34,9 @@ describe("wikipedia definitions", () => {
 
     expect(result).toEqual({
       word: "APPLE",
-      definition:
+      definitions: [
         "Apple Inc. is an American multinational technology company headquartered in Cupertino, California.",
+      ],
       source: "wikipedia",
     });
   });
@@ -73,8 +74,9 @@ describe("wikipedia definitions", () => {
 
     expect(result).toEqual({
       word: "TAYLOR SWIFT",
-      definition:
+      definitions: [
         "Taylor Swift is an American singer-songwriter who is widely known for her genre-spanning music.",
+      ],
       source: "wikipedia",
     });
     expect(mockFetch).toHaveBeenCalledTimes(3);

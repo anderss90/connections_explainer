@@ -34,7 +34,7 @@ describe("fetchWordDefinitions", () => {
     (fetchGeminiDefinitions as jest.Mock).mockResolvedValueOnce([
       {
         word: "CONCERT",
-        definition: "A live musical performance.",
+        definitions: ["A live musical performance."],
         source: "gemini",
       },
     ]);
@@ -42,7 +42,7 @@ describe("fetchWordDefinitions", () => {
     (fetchDictionaryDefinitions as jest.Mock).mockResolvedValue([
       {
         word: "GIG",
-        definition: "A paid performance by a musician.",
+        definitions: ["A paid performance by a musician."],
         source: "dictionary",
       },
     ]);
@@ -62,7 +62,7 @@ describe("fetchWordDefinitions", () => {
     (fetchWikipediaDefinitions as jest.Mock).mockResolvedValue([
       {
         word: "APPLE",
-        definition: "Apple Inc. is an American technology company.",
+        definitions: ["Apple Inc. is an American technology company."],
         source: "wikipedia",
       },
     ]);
@@ -71,7 +71,7 @@ describe("fetchWordDefinitions", () => {
 
     expect(definitions[0]).toEqual({
       word: "APPLE",
-      definition: "Apple Inc. is an American technology company.",
+      definitions: ["Apple Inc. is an American technology company."],
       source: "wikipedia",
     });
     expect(fetchWikipediaDefinitions).toHaveBeenCalledWith(["APPLE"], expect.any(Function));
@@ -85,8 +85,9 @@ describe("fetchWordDefinitions", () => {
       .mockResolvedValueOnce([
         {
           word: "FROM NEANDER",
-          definition:
+          definitions: [
             "Refers to Neanderthals, an extinct human species that lived in Europe and western Asia.",
+          ],
           source: "gemini",
         },
       ]);

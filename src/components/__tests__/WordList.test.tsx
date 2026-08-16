@@ -8,12 +8,12 @@ describe("WordList", () => {
         definitions={[
           {
             word: "CONCERT",
-            definition: "A live musical performance.",
+            definitions: ["A live musical performance."],
             source: "gemini",
           },
           {
             word: "GIG",
-            definition: "A paid performance by a musician.",
+            definitions: ["A paid performance by a musician."],
             source: "dictionary",
           },
         ]}

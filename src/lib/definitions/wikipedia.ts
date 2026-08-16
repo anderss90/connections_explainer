@@ -53,7 +53,7 @@ export function parseWikipediaSummary(
 
   return {
     word,
-    definition: trimWikipediaExtract(extract),
+    definitions: [trimWikipediaExtract(extract)],
     source: "wikipedia",
   };
 }

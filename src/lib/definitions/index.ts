@@ -76,7 +76,7 @@ export async function fetchWordDefinitions(
 
     definitionsByWord.set(word, {
       word,
-      definition: "Definition unavailable.",
+      definitions: ["Definition unavailable."],
       source: "dictionary",
     });
   }

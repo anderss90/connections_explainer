@@ -18,7 +18,11 @@ export function WordList({ definitions }: WordListProps) {
     <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {definitions.map((item) => (
         <li key={item.word}>
-          <WordCard word={item.word} definition={item.definition} source={item.source} />
+          <WordCard
+            word={item.word}
+            definitions={item.definitions}
+            source={item.source}
+          />
         </li>
       ))}
     </ul>
