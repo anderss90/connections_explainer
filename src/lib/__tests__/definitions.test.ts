@@ -5,7 +5,7 @@ import {
   fetchDictionaryDefinition,
   fetchDictionaryDefinitions,
 } from "../definitions/dictionary";
-import { fetchWikipediaDefinitions } from "../definitions/wikipedia";
+import { fetchWikipediaDefinitions, fetchWikipediaDefinition } from "../definitions/wikipedia";
 
 jest.mock("../definitions/gemini", () => ({
   fetchGeminiDefinitions: jest.fn(),
@@ -18,6 +18,7 @@ jest.mock("../definitions/dictionary", () => ({
 
 jest.mock("../definitions/wikipedia", () => ({
   fetchWikipediaDefinitions: jest.fn(),
+  fetchWikipediaDefinition: jest.fn(),
 }));
 
 describe("fetchWordDefinitions", () => {
@@ -27,6 +28,7 @@ describe("fetchWordDefinitions", () => {
     (fetchGeminiDefinitions as jest.Mock).mockResolvedValue([]);
     (fetchDictionaryDefinitions as jest.Mock).mockResolvedValue([]);
     (fetchWikipediaDefinitions as jest.Mock).mockResolvedValue([]);
+    (fetchWikipediaDefinition as jest.Mock).mockResolvedValue(null);
     (fetchDictionaryDefinition as jest.Mock).mockResolvedValue(null);
   });
 
@@ -75,6 +77,21 @@ describe("fetchWordDefinitions", () => {
       source: "wikipedia",
     });
     expect(fetchWikipediaDefinitions).toHaveBeenCalledWith(["APPLE"], expect.any(Function));
+  });
+
+  it("falls back to per-word Wikipedia when dictionary has no entry", async () => {
+    (fetchDictionaryDefinition as jest.Mock).mockResolvedValue(null);
+    (fetchWikipediaDefinition as jest.Mock).mockResolvedValue({
+      word: "APPLE",
+      definitions: ["Apple Inc. is an American technology company."],
+      source: "wikipedia",
+    });
+
+    const definitions = await fetchWordDefinitions(["APPLE"], "2026-08-16");
+
+    expect(fetchDictionaryDefinition).toHaveBeenCalledWith("APPLE", expect.any(Function));
+    expect(fetchWikipediaDefinition).toHaveBeenCalledWith("APPLE", expect.any(Function));
+    expect(definitions[0].source).toBe("wikipedia");
   });
 
   it("retries Gemini for words still missing after Wikipedia", async () => {

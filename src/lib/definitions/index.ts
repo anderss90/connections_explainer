@@ -4,7 +4,7 @@ import {
   fetchDictionaryDefinitions,
 } from "./dictionary";
 import { fetchGeminiDefinitions } from "./gemini";
-import { fetchWikipediaDefinitions } from "./wikipedia";
+import { fetchWikipediaDefinitions, fetchWikipediaDefinition } from "./wikipedia";
 import type { WordDefinition } from "../types";
 
 function getMissingWords(
@@ -68,10 +68,24 @@ export async function fetchWordDefinitions(
 
   missingWords = getMissingWords(words, definitionsByWord);
   for (const word of missingWords) {
-    const fallback = await fetchDictionaryDefinition(word, fetchFn);
-    if (fallback) {
-      definitionsByWord.set(word, fallback);
+    const dictionary = await fetchDictionaryDefinition(word, fetchFn);
+    if (dictionary) {
+      definitionsByWord.set(word, dictionary);
       continue;
+    }
+
+    const wikipedia = await fetchWikipediaDefinition(word, fetchFn);
+    if (wikipedia) {
+      definitionsByWord.set(word, wikipedia);
+      continue;
+    }
+
+    if (apiKey) {
+      const gemini = await fetchGeminiDefinitions([word], apiKey);
+      if (gemini[0]) {
+        definitionsByWord.set(word, gemini[0]);
+        continue;
+      }
     }
 
     definitionsByWord.set(word, {
