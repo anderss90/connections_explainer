@@ -2,6 +2,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { WordDefinition } from "../types";
 import { MAX_DEFINITIONS, normalizeDefinitions } from "./utils";
 
+export const GEMINI_MODEL = "gemini-3.6-flash";
+
 export interface GeminiDefinitionResult {
   word: string;
   definitions: string[];
@@ -70,7 +72,7 @@ export async function fetchGeminiDefinitions(
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
 
   try {
     const result = await model.generateContent(buildGeminiPrompt(words));
