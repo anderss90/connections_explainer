@@ -1,3 +1,4 @@
+import { clientHeaders } from "./http";
 import type { PuzzleData } from "./types";
 
 const TOMSGUIDE_URL =
@@ -37,10 +38,7 @@ export async function fetchTomsguidePuzzle(
 ): Promise<PuzzleData | null> {
   try {
     const response = await fetchFn(TOMSGUIDE_URL, {
-      headers: {
-        Accept: "text/html",
-        "User-Agent": "ConnectionsWordsSite/1.0",
-      },
+      headers: clientHeaders("text/html"),
       next: { revalidate: 3600 },
     });
 

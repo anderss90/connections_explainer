@@ -44,6 +44,7 @@ describe("nyt-connections", () => {
       expect.objectContaining({
         headers: expect.objectContaining({
           Accept: "application/json",
+          "User-Agent": expect.stringContaining("ConnectionsWordsSite/1.0"),
         }),
       })
     );

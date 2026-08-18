@@ -1,5 +1,5 @@
-import { clearCache } from "../cache";
-import { fetchWordDefinitions } from "../definitions";
+import { clearCache, setCached } from "../cache";
+import { fetchWordDefinitions, UNAVAILABLE_DEFINITION } from "../definitions";
 import { fetchGeminiDefinitions } from "../definitions/gemini";
 import {
   fetchDictionaryDefinition,
@@ -121,5 +121,63 @@ describe("fetchWordDefinitions", () => {
     expect(definitions[0].source).toBe("gemini");
 
     delete process.env.GEMINI_API_KEY;
+  });
+
+  it("does not cache unavailable definitions", async () => {
+    const first = await fetchWordDefinitions(["VELVET ROPE"], "2026-08-18");
+
+    expect(first[0].definitions).toEqual([UNAVAILABLE_DEFINITION]);
+    expect(fetchWikipediaDefinitions).toHaveBeenCalledTimes(1);
+
+    (fetchWikipediaDefinitions as jest.Mock).mockResolvedValue([
+      {
+        word: "VELVET ROPE",
+        definitions: ["A barrier rope used to control crowds."],
+        source: "wikipedia",
+      },
+    ]);
+
+    const second = await fetchWordDefinitions(["VELVET ROPE"], "2026-08-18");
+
+    expect(second[0].source).toBe("wikipedia");
+    expect(fetchWikipediaDefinitions).toHaveBeenCalledTimes(2);
+  });
+
+  it("ignores a stale cache of unavailable definitions", async () => {
+    setCached("definitions:2026-08-18:APPLE", [
+      {
+        word: "APPLE",
+        definitions: [UNAVAILABLE_DEFINITION],
+        source: "dictionary",
+      },
+    ]);
+
+    (fetchWikipediaDefinitions as jest.Mock).mockResolvedValue([
+      {
+        word: "APPLE",
+        definitions: ["Apple Inc. is an American technology company."],
+        source: "wikipedia",
+      },
+    ]);
+
+    const definitions = await fetchWordDefinitions(["APPLE"], "2026-08-18");
+
+    expect(definitions[0].source).toBe("wikipedia");
+    expect(fetchWikipediaDefinitions).toHaveBeenCalled();
+  });
+
+  it("caches successful definitions", async () => {
+    (fetchWikipediaDefinitions as jest.Mock).mockResolvedValue([
+      {
+        word: "APPLE",
+        definitions: ["Apple Inc. is an American technology company."],
+        source: "wikipedia",
+      },
+    ]);
+
+    await fetchWordDefinitions(["APPLE"], "2026-08-16");
+    await fetchWordDefinitions(["APPLE"], "2026-08-16");
+
+    expect(fetchWikipediaDefinitions).toHaveBeenCalledTimes(1);
   });
 });

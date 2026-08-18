@@ -1,3 +1,4 @@
+import { clientHeaders } from "./http";
 import type { NYTRawResponse, PuzzleData } from "./types";
 
 const NYT_CONNECTIONS_URL =
@@ -43,10 +44,7 @@ export async function fetchNYTPuzzle(
 
   try {
     const response = await fetchFn(url, {
-      headers: {
-        Accept: "application/json",
-        "User-Agent": "ConnectionsWordsSite/1.0",
-      },
+        headers: clientHeaders("application/json"),
       next: { revalidate: 3600 },
     });
 

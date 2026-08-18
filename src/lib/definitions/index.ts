@@ -7,6 +7,14 @@ import { fetchGeminiDefinitions } from "./gemini";
 import { fetchWikipediaDefinitions, fetchWikipediaDefinition } from "./wikipedia";
 import type { WordDefinition } from "../types";
 
+export const UNAVAILABLE_DEFINITION = "Definition unavailable.";
+
+function hasUnavailableDefinition(definitions: WordDefinition[]): boolean {
+  return definitions.some((item) =>
+    item.definitions.includes(UNAVAILABLE_DEFINITION)
+  );
+}
+
 function getMissingWords(
   words: string[],
   definitionsByWord: Map<string, WordDefinition>
@@ -30,7 +38,7 @@ export async function fetchWordDefinitions(
 ): Promise<WordDefinition[]> {
   const cacheKey = `definitions:${date}:${words.join(",")}`;
   const cached = getCached<WordDefinition[]>(cacheKey);
-  if (cached) {
+  if (cached && !hasUnavailableDefinition(cached)) {
     return cached;
   }
 
@@ -90,7 +98,7 @@ export async function fetchWordDefinitions(
 
     definitionsByWord.set(word, {
       word,
-      definitions: ["Definition unavailable."],
+      definitions: [UNAVAILABLE_DEFINITION],
       source: "dictionary",
     });
   }
@@ -99,6 +107,9 @@ export async function fetchWordDefinitions(
     .map((word) => definitionsByWord.get(word))
     .filter((definition): definition is WordDefinition => definition !== undefined);
 
-  setCached(cacheKey, ordered);
+  if (!hasUnavailableDefinition(ordered)) {
+    setCached(cacheKey, ordered);
+  }
+
   return ordered;
 }

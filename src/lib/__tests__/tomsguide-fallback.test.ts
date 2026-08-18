@@ -32,6 +32,15 @@ describe("tomsguide-fallback", () => {
 
     const puzzle = await fetchTomsguidePuzzle("2026-08-16", mockFetch);
 
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Accept: "text/html",
+          "User-Agent": expect.stringContaining("ConnectionsWordsSite/1.0"),
+        }),
+      })
+    );
     expect(puzzle?.source).toBe("tomsguide");
     expect(puzzle?.words).toHaveLength(16);
   });
